@@ -1,0 +1,207 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum PostStatus {
+  ACTIVE
+  DELETED
+  DELETED_BY_ADMIN
+}
+
+enum ReportStatus {
+  PENDING
+  REJECTED
+  ACTION_TAKEN
+}
+
+enum AccountStatus {
+  ACTIVE
+  BANNED
+}
+
+enum Privacy {
+  PUBLIC
+  FRIENDS
+  ONLYME
+}
+
+enum LoginType {
+  EMAIL
+  FACEBOOK
+  GITHUB
+  GOOGLE
+}
+
+model Admin {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  email     String        @unique
+  password  String
+  status    AccountStatus @default(ACTIVE)
+  createdAt DateTime      @default(now()) @map("_createdAt") @db.Date
+  updatedAt DateTime      @updatedAt @map("_updatedAt") @db.Date
+
+  @@map("admins")
+}
+
+model User {
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
+  refId           String         @unique
+  email           String         @unique
+  name            String
+  dateOfBirth     DateTime?      @db.Date
+  status          AccountStatus  @default(ACTIVE)
+  posts           Post[]
+  comments        Comment[]
+  Like            Like[]
+  Stories         Story[]
+  sentRequests    Friend[]       @relation("sentRequests")
+  gotRequests     Friend[]       @relation("gotRequests")
+  isProfileLocked Boolean        @default(false)
+  profileImage    String?
+  loginType       String
+  createdAt       DateTime       @default(now()) @map("_createdAt") @db.Date
+  updatedAt       DateTime       @updatedAt @map("_updatedAt") @db.Date
+  LoginHistory    LoginHistory[]
+  Notification    Notification[]
+  Report          Report[]
+
+  @@map("users")
+}
+
+model Post {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  content        String
+  user           User           @relation(fields: [userId], references: [id])
+  userId         String         @db.ObjectId
+  comments       Comment[]
+  privacy        Privacy        @default(PUBLIC)
+  file           File?          @relation(fields: [fileId], references: [id])
+  fileId         String?        @db.ObjectId
+  status         PostStatus     @default(ACTIVE)
+  deletedAdminId String?        @db.ObjectId
+  createdAt      DateTime       @default(now()) @map("_createdAt") @db.Date
+  updatedAt      DateTime       @updatedAt @map("_updatedAt") @db.Date
+  Like           Like[]
+  Notification   Notification[]
+  Report         Report[]
+
+  @@map("posts")
+}
+
+model File {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  path         String
+  format       String
+  resourceType String
+  metadata     Json
+  fullUrl      String
+  createdAt    DateTime @default(now()) @map("_createdAt") @db.Date
+  updatedAt    DateTime @updatedAt @map("_updatedAt") @db.Date
+  Story        Story?
+  Post         Post[]
+
+  @@map("files")
+}
+
+model Comment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    String   @db.ObjectId
+  createdAt DateTime @default(now()) @map("_createdAt") @db.Date
+  updatedAt DateTime @updatedAt @map("_updatedAt") @db.Date
+  Report    Report[]
+  Like      Like[]
+
+  @@map("comments")
+}
+
+model Like {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  post      Post?    @relation(fields: [postId], references: [id])
+  postId    String   @db.ObjectId
+  comment   Comment? @relation(fields: [commentId], references: [id])
+  commentId String   @db.ObjectId
+  createdAt DateTime @default(now()) @map("_createdAt") @db.Date
+  updatedAt DateTime @updatedAt @map("_updatedAt") @db.Date
+
+  @@map("likes")
+}
+
+model Friend {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  from       User     @relation("sentRequests", fields: [fromUserId], references: [id])
+  fromUserId String   @db.ObjectId
+  to         User     @relation("gotRequests", fields: [toUserId], references: [id])
+  toUserId   String   @db.ObjectId
+  status     String   @default("FRIEND_PENDING")
+  createdAt  DateTime @default(now()) @map("_createdAt") @db.Date
+  updatedAt  DateTime @updatedAt @map("_updatedAt") @db.Date
+
+  @@map("friendrequests")
+}
+
+model Story {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  fileId    String   @unique @db.ObjectId
+  file      File     @relation(fields: [fileId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("stories")
+}
+
+model LoginHistory {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  token     String
+  userAgent String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("loginhistories")
+}
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  postId    String   @db.ObjectId
+  post      Post?    @relation(fields: [postId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notifications")
+}
+
+model Report {
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId
+  reportUserId String       @db.ObjectId
+  user         User         @relation(fields: [reportUserId], references: [id])
+  postId       String?      @db.ObjectId
+  post         Post?        @relation(fields: [postId], references: [id])
+  commentId    String?      @db.ObjectId
+  comment      Comment?     @relation(fields: [commentId], references: [id])
+  status       ReportStatus @default(PENDING)
+  remarks      String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@map("reports")
+}
