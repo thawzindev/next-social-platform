@@ -6,8 +6,19 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 export async function GET(request: NextRequest) {
     try {
         const { userId } = auth();
+
         if (!userId) {
             return new Response('Unauthorized', { status: 401 });
+        }
+
+        let authUser = await prisma.user.findUnique({
+            where: {
+                refId: userId?.toString(),
+            },
+        });
+
+        if (!authUser) {
+            return new Response('authUser not found', { status: 401 });
         }
 
         const reqUserId = request.nextUrl.searchParams.get('userId');
@@ -29,11 +40,23 @@ export async function GET(request: NextRequest) {
                         profileImage: true,
                     },
                 },
+                Like: {
+                    select: {
+                        id: true,
+                        userId: true,
+                    },
+                },
             },
         });
 
+        const postsWithLikeCount = posts.map((post) => ({
+            ...post,
+            likeCount: post.Like.length,
+            userId: authUser.id,
+        }));
+
         return NextResponse.json({
-            data: posts,
+            data: postsWithLikeCount,
             status: 200,
             message: 'success',
         });

@@ -8,6 +8,8 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
+    let action = 'like';
+
     const { success, data, error } = createScheme.safeParse(body);
 
     if (!success) {
@@ -40,12 +42,23 @@ export async function POST(request: NextRequest) {
                 id: post.id,
             },
         });
+
+        action = 'dislike';
     } else {
         post = await prisma.like.create({
             data: {
-                postId: body.postId,
-                userId: authUser.id,
-                commentId: '', // Add the required commentId property here
+                // userId: authUser.id,
+                // postId: body.postId,
+                user: {
+                    connect: {
+                        id: authUser.id,
+                    },
+                },
+                post: {
+                    connect: {
+                        id: body.postId,
+                    },
+                },
             },
         });
     }
@@ -60,8 +73,8 @@ export async function POST(request: NextRequest) {
         id: post.id,
         postId: post.postId,
         userId: post.userId,
-        action: 'like',
-        totalReactions: totalReactions,
+        action: action,
+        likeCount: totalReactions,
     };
 
     return NextResponse.json({

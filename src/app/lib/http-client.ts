@@ -48,8 +48,10 @@ class HttpClient {
         } else {
             console.log('Error', error.message);
         }
-        console.log('Error MSG : ', error.response.data.message);
-        throw new Error(error.response.data.message);
+        // console.log('Error MSG : ', error.response.data.message);
+        throw new Error(
+            error?.response?.data?.message || 'Something went wrong!.',
+        );
     };
 
     get<T = any, R = AxiosResponse<T>>(

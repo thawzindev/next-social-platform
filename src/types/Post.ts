@@ -6,6 +6,8 @@ export interface Post {
     fileId: string;
     createdAt: string;
     updatedAt: string;
+    likeCount: number;
+    Like: [];
     file?: File;
     user: User;
 }

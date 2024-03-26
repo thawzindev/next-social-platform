@@ -34,3 +34,18 @@ export const friendRequestList = async () => {
     const response = await httpClient.get(`friends/request/list`);
     return response?.data as FriendRequest[];
 };
+
+export const makeReaction = async (payload: any) => {
+    const response = await httpClient.post(`reactions`, payload);
+    return response?.data as any;
+};
+
+export const postComments = async (postId: string) => {
+    const response = await httpClient.get(`posts/comments?postId=${postId}`);
+    return response?.data as any;
+};
+
+export const makeComment = async (payload: any) => {
+    const response = await httpClient.post(`posts/comments`, payload);
+    return response?.data as any;
+};

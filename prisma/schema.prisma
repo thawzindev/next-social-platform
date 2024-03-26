@@ -133,7 +133,7 @@ model Like {
   post      Post?    @relation(fields: [postId], references: [id])
   postId    String   @db.ObjectId
   comment   Comment? @relation(fields: [commentId], references: [id])
-  commentId String   @db.ObjectId
+  commentId String?   @db.ObjectId
   createdAt DateTime @default(now()) @map("_createdAt") @db.Date
   updatedAt DateTime @updatedAt @map("_updatedAt") @db.Date
 
