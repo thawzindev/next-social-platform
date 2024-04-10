@@ -72,6 +72,7 @@ model User {
   LoginHistory    LoginHistory[]
   Notification    Notification[]
   Report          Report[]
+  Bookmark        Bookmark[]
 
   @@map("users")
 }
@@ -92,6 +93,7 @@ model Post {
   Like           Like[]
   Notification   Notification[]
   Report         Report[]
+  Bookmark       Bookmark[]
 
   @@map("posts")
 }
@@ -133,7 +135,7 @@ model Like {
   post      Post?    @relation(fields: [postId], references: [id])
   postId    String   @db.ObjectId
   comment   Comment? @relation(fields: [commentId], references: [id])
-  commentId String?   @db.ObjectId
+  commentId String?  @db.ObjectId
   createdAt DateTime @default(now()) @map("_createdAt") @db.Date
   updatedAt DateTime @updatedAt @map("_updatedAt") @db.Date
 
@@ -184,10 +186,23 @@ model Notification {
   content   String
   postId    String   @db.ObjectId
   post      Post?    @relation(fields: [postId], references: [id])
+  isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("notifications")
+}
+
+model Bookmark {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  postId    String   @db.ObjectId
+  post      Post?    @relation(fields: [postId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("bookmarks")
 }
 
 model Report {

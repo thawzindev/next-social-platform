@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { create } from 'domain';
+import { useRouter } from 'next/navigation';
 
 const privacyOptions = [
     { name: 'PUBLIC', value: 'PUBLIC' },
@@ -37,6 +38,7 @@ const CreatePostModal = () => {
     const [file, setFile] = useState('');
 
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     const mutation = useMutation({
         mutationKey: ['add-post'],
@@ -48,6 +50,12 @@ const CreatePostModal = () => {
             createPostModal.onClose();
             queryClient.invalidateQueries({ queryKey: ['posts'] });
             setIsLoading(false);
+
+            router.push(
+                `/feed?uid=${Math.random()
+                    .toString(36)
+                    .substring(2, 2 + length)}`,
+            );
         },
         onError: (error) => {
             toast.error(error.message);

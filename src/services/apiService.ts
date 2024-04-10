@@ -10,9 +10,8 @@ const httpClient = new HttpClient(baseUrl);
 export const getPosts = async (page?: number, userId?: string) => {
     let url = 'posts';
     if (userId) url = `posts?userId=${userId}`;
-    // if (page) url = `posts?page=${page}`;
+    if (page) url = `posts?page=${page}`;
     const response = await httpClient.get(url);
-    console.log('posts response', response);
     return response ? (response.data as Post[]) : [];
 };
 
@@ -40,6 +39,11 @@ export const makeReaction = async (payload: any) => {
     return response?.data as any;
 };
 
+export const makeBookmark = async (payload: any) => {
+    const response = await httpClient.post(`bookmarks`, payload);
+    return response?.data as any;
+};
+
 export const postComments = async (postId: string) => {
     const response = await httpClient.get(`posts/comments?postId=${postId}`);
     return response?.data as any;
@@ -47,5 +51,15 @@ export const postComments = async (postId: string) => {
 
 export const makeComment = async (payload: any) => {
     const response = await httpClient.post(`posts/comments`, payload);
+    return response?.data as any;
+};
+
+export const searchResult = async (keywords: string) => {
+    const response = await httpClient.get(`search?keywords=${keywords}`);
+    return response?.data as any;
+};
+
+export const getNotifications = async () => {
+    const response = await httpClient.get(`notifications`);
     return response?.data as any;
 };

@@ -9,7 +9,7 @@ const PostSkeleton = () => (
 
 const FeedSkeleton = () => {
     return (
-        <div className="mt-4 w-[700px] space-y-4">
+        <div className="mt-4 space-y-4">
             <div className="main-section rounded-md border bg-white px-4 pt-4">
                 <PostSkeleton />
                 <PostSkeleton />

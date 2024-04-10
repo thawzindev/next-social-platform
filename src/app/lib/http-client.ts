@@ -41,6 +41,7 @@ class HttpClient {
     private _handleResponse = ({ data }: AxiosResponse) => data;
 
     private _handleError = (error: any) => {
+        console.log('errorrrrr', error);
         if (error.response) {
             console.log('HTTP Error:', error.response.data);
         } else if (error.request) {

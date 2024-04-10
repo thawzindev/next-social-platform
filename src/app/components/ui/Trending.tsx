@@ -1,31 +1,19 @@
+'use client';
+
 import { Input } from '@/components/ui/input';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 
 const Trending = () => {
+    const router = useRouter();
+
+    const searchResult = (value: string) => {
+        router.push(`/search?keywords=${value}`);
+    };
+
     return (
         <>
-            <div className="border-1 mt-8 h-fit w-80 space-y-6 rounded rounded-md border bg-[#FFFFFF] p-4">
-                {/* <div className="mt-4 flex items-start space-x-2 rounded bg-gray-300 p-2">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        className="h-5 w-5"
-                    >
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.3-4.3"></path>
-                    </svg>
-                    <button className="justify-contents-start flex-1 border-none focus:ring-0">
-                        Search ...
-                    </button>
-                </div> */}
-
+            <div className="border-1 mt-8 h-fit space-y-6 rounded rounded-md border bg-[#FFFFFF] p-4">
                 <div className="mt-0">
                     <h3 className="text-sm font-bold">Search</h3>
                     <div className="mt-2 space-y-2">
@@ -33,11 +21,16 @@ const Trending = () => {
                             type="text"
                             className="rounded-md focus:outline-none"
                             placeholder="keywords ..."
+                            onKeyDown={(event) => {
+                                if (event.key === 'Enter') {
+                                    searchResult(event.target.value);
+                                }
+                            }}
                         />
                     </div>
                 </div>
 
-                <hr />
+                {/* <hr />
 
                 <div className="mt-0">
                     <h3 className="text-sm font-bold">Top Trendings</h3>
@@ -70,7 +63,7 @@ const Trending = () => {
                             </span>
                         </div>
                     </div>
-                </div>
+                </div> */}
 
                 <hr />
 

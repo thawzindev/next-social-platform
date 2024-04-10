@@ -32,8 +32,8 @@ const Sidebar = () => {
     // console.log(user.imageUrl);
 
     return (
-        <div className="border-1 mt-8 h-fit w-64 space-y-4 rounded rounded-md border bg-[#FFFFFF] p-4">
-            <div className="">
+        <div className="border-1 mt-8 h-fit space-y-4 rounded rounded-md border bg-[#FFFFFF] p-4">
+            <div className="ml-5">
                 {/* <Image
                     src={
                         'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Logo_of_Twitter.svg/512px-Logo_of_Twitter.svg.png'
@@ -43,7 +43,7 @@ const Sidebar = () => {
                     height={40}
                     className="ml-4"
                 /> */}
-                {/* <Button onClick={() => router.push('/feed')}>My Logo</Button> */}
+                <h1 className="text-lg font-bold">SocialShot</h1>
             </div>
 
             <div className="space-y-2">
@@ -75,24 +75,24 @@ const Sidebar = () => {
                     </span> */}
                 </button>
 
-                <button className="inline-flex h-10 w-full items-center justify-start whitespace-nowrap rounded-md px-4 py-2 text-left text-sm font-medium text-gray-900 ring-offset-background transition-colors hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                <button
+                    className="inline-flex h-10 w-full items-center justify-start whitespace-nowrap rounded-md px-4 py-2 text-left text-sm font-medium text-gray-900 ring-offset-background transition-colors hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                    onClick={() => {
+                        router.push('/notifications');
+                    }}
+                >
                     <BellIcon className="mr-2 h-4 w-4" />
                     Notifications
                 </button>
 
-                <button className="inline-flex h-10 w-full items-center justify-start whitespace-nowrap rounded-md px-4 py-2 text-left text-sm font-medium text-gray-900 ring-offset-background transition-colors hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                <button
+                    className="inline-flex h-10 w-full items-center justify-start whitespace-nowrap rounded-md px-4 py-2 text-left text-sm font-medium text-gray-900 ring-offset-background transition-colors hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                    onClick={() => {
+                        router.push('/messages');
+                    }}
+                >
                     <MailIcon className="mr-2 h-4 w-4" />
                     Messages
-                </button>
-
-                <button className="inline-flex h-10 w-full items-center justify-start whitespace-nowrap rounded-md px-4 py-2 text-left text-sm font-medium text-gray-900 ring-offset-background transition-colors hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                    <PlusCircleIcon className="mr-2 h-4 w-4" />
-                    Create
-                </button>
-
-                <button className="inline-flex h-10 w-full items-center justify-start whitespace-nowrap rounded-md px-4 py-2 text-left text-sm font-medium text-gray-900 ring-offset-background transition-colors hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
-                    <SearchIcon className="mr-2 h-4 w-4" />
-                    Search
                 </button>
 
                 <hr />
@@ -121,13 +121,13 @@ const Sidebar = () => {
 
                 <hr />
 
-                {/* <SignOutButton>
-                    <span>
-                        <LogOutIcon className="mr-2 h-4 w-4" />
-                        Logout
-                    </span>
-                </SignOutButton> */}
-                <SignOutButton />
+                <SignOutButton>
+                    <div className="ml-4 flex cursor-pointer px-2 py-3 hover:rounded-lg hover:bg-red-100">
+                        <LogOutIcon className="h-6 w-6" />
+                        <span className="ml-3">Logout</span>
+                    </div>
+                </SignOutButton>
+                {/* <SignOutButton /> */}
             </div>
         </div>
     );

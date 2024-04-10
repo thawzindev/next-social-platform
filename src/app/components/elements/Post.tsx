@@ -15,7 +15,7 @@ import Link from 'next/link';
 import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { makeComment, makeReaction, postComments } from '@/services/apiService';
+import { makeBookmark, makeComment, makeReaction, postComments } from '@/services/apiService';
 import toast from 'react-hot-toast';
 import {
     Drawer,
@@ -36,11 +36,16 @@ const Post: React.FC<Post> = (post) => {
     const queryClient = useQueryClient();
 
     const [isLoading, setIsLoading] = React.useState(false);
+
     const [likeCount, setLikeCount] = React.useState(post.likeCount);
     const [commentText, setCommentText] = React.useState('');
 
     const [isLiked, setIsLiked] = React.useState(
-        post.Like.filter((like) => like.userId === post.userId).length > 0,
+        post?.Like?.filter((like) => like?.userId === post.userId).length > 0,
+    );
+
+    const [isBookmark, setIsBookmark] = React.useState(
+        post?.Bookmark?.filter((bookmark) => bookmark?.userId === post.userId).length > 0,
     );
 
     const reactionMutation = useMutation({
@@ -56,6 +61,25 @@ const Post: React.FC<Post> = (post) => {
         },
         onError: (error) => {
             console.log('error ggg', error);
+            toast.error(error?.message);
+        },
+        onSettled: () => {
+            setIsLoading(false);
+        },
+    });
+
+
+    const bookmarkMutation = useMutation({
+        mutationFn: (payload: any) => {
+            return makeBookmark(payload);
+        },
+        onSuccess: async (data) => {
+            console.log('SUCCESS');
+            console.log(data);
+            setIsBookmark(data?.action === 'store' ? true : false);
+            toast.success(data?.message || 'Success');
+        },
+        onError: (error) => {
             toast.error(error?.message);
         },
         onSettled: () => {
@@ -95,8 +119,6 @@ const Post: React.FC<Post> = (post) => {
         error,
     } = useFetchPostComments(fetchComments, post.id);
 
-    console.log(comments);
-
     const handleButtonClick = () => {
         setFetchComments(true);
     };
@@ -109,7 +131,12 @@ const Post: React.FC<Post> = (post) => {
         commentMutation.mutate(payload);
     };
 
-    const saveToBookmark = () => { };
+    const saveToBookmark = () => {
+        const payload = {
+            postId: post.id,
+        };
+        bookmarkMutation.mutate(payload);
+    };
 
     return (
         <>
@@ -118,7 +145,7 @@ const Post: React.FC<Post> = (post) => {
                     <div className="flex items-center gap-2">
                         <Image
                             className="h-8 w-8 overflow-hidden rounded-full object-cover"
-                            src={post.user.profileImage}
+                            src={post?.user?.profileImage}
                             height={25}
                             width={25}
                             alt="user avatar"
@@ -209,7 +236,7 @@ const Post: React.FC<Post> = (post) => {
                                                 ) : error ? (
                                                     'Error fetching comments'
                                                 ) : (
-                                                    comments?.map((comment) => (
+                                                    comments?.map((comment: any) => (
                                                         <div
                                                             className="grid gap-1.5 border-b pb-2 text-sm"
                                                             key={
@@ -260,8 +287,12 @@ const Post: React.FC<Post> = (post) => {
                             className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium text-gray-400 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                             onClick={() => saveToBookmark()}
                         >
-                            <BookmarkIcon className="mr-1 h-6 w-6 hover:text-blue-400" />
-                            4.3K
+                            {isBookmark && (
+                                <BookmarkIcon className="mr-1 h-6 w-6 hover:text-blue-400 fill-orange-600" />
+                            )}
+
+                            {!isBookmark && (
+                                <BookmarkIcon className="mr-1 h-6 w-6 hover:text-blue-400" />)}
                         </button>
                     </div>
                 </div>

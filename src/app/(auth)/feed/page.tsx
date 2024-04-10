@@ -17,16 +17,16 @@ import FeedSkeleton from '@/app/components/skeletons/FeedSkeleton';
 const Feed = () => {
     return (
         <>
-            <div className="min-h-screen">
-                <div className="flex-1 border-gray-600">
-                    <div className="p-4">
-                        <CreatePost />
-                        <Suspense fallback={<FeedSkeleton />}>
-                            {<FeedPage />}
-                        </Suspense>
-                    </div>
+            {/* <div className="min-h-screen"> */}
+            <div className="flex-1 border-gray-600">
+                <div className="px-2">
+                    <CreatePost />
+                    <Suspense fallback={<FeedSkeleton />}>
+                        {<FeedPage />}
+                    </Suspense>
                 </div>
             </div>
+            {/* </div> */}
         </>
     );
 };

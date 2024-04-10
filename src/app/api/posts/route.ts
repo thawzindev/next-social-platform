@@ -2,6 +2,7 @@ import { createScheme } from '@/requests/posts/create';
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '../../../../lib/prisma';
 import { auth, currentUser } from '@clerk/nextjs/server';
+import { ObjectId } from 'mongodb';
 
 export async function GET(request: NextRequest) {
     try {
@@ -21,7 +22,17 @@ export async function GET(request: NextRequest) {
             return new Response('authUser not found', { status: 401 });
         }
 
+        const page = Number(request.nextUrl.searchParams.get('page')) || 1;
+        const limit = Number(request.nextUrl.searchParams.get('limit')) || 10;
+        const skip = (page - 1) * limit;
+
         const reqUserId = request.nextUrl.searchParams.get('userId');
+
+        const totalPosts = await prisma.post.count({
+            where: {
+                userId: reqUserId ?? undefined,
+            },
+        });
 
         const posts = await prisma.post.findMany({
             where: {
@@ -30,6 +41,8 @@ export async function GET(request: NextRequest) {
             orderBy: {
                 createdAt: 'desc',
             },
+            take: limit,
+            skip: skip,
             include: {
                 file: true,
                 user: {
@@ -46,6 +59,13 @@ export async function GET(request: NextRequest) {
                         userId: true,
                     },
                 },
+                Bookmark: {
+                    select: {
+                        id: true,
+                        userId: true,
+                        postId: true,
+                    },
+                },
             },
         });
 
@@ -57,6 +77,11 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({
             data: postsWithLikeCount,
+            meta: {
+                total: totalPosts,
+                page: page,
+                limit: limit,
+            },
             status: 200,
             message: 'success',
         });
@@ -88,8 +113,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        console.log('user id ', userId);
-
         let user = await prisma.user.findUnique({
             where: {
                 refId: userId,
@@ -108,6 +131,29 @@ export async function POST(request: NextRequest) {
                 userId: user.id,
             },
         });
+
+        // Fetch the user's friends
+        const friends = await prisma.friend.findMany({
+            where: {
+                OR: [{ fromUserId: user.id }, { toUserId: user.id }],
+            },
+        });
+
+        console.log('friendssss', friends);
+
+        // Create a notification for each friend
+        for (const friend of friends) {
+            await prisma.notification.create({
+                data: {
+                    userId:
+                        friend.fromUserId === user.id
+                            ? friend.toUserId
+                            : friend.fromUserId,
+                    content: `${user.name} has created a new post.`,
+                    postId: post.id,
+                },
+            });
+        }
 
         return NextResponse.json({
             status: 200,
