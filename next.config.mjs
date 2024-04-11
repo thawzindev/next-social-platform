@@ -5,6 +5,7 @@ const nextConfig = {
             'res.cloudinary.com',
             'img.clerk.com',
             'cdn2.vectorstock.com',
+            'encrypted-tbn0.gstatic.com',
         ],
     },
 

@@ -63,3 +63,36 @@ export const getNotifications = async () => {
     const response = await httpClient.get(`notifications`);
     return response?.data as any;
 };
+
+export const getUnReadNotificationCount = async () => {
+    const response = await httpClient.get(`notifications/unread-count`);
+    return response?.data as any;
+};
+
+export const readNotification = async (payload: any) => {
+    const response = await httpClient.post(`notifications/read`, payload);
+    return response?.data as any;
+};
+
+export const getPostDetail = async (id: string) => {
+    const response = await httpClient.get(`posts/detail?id=${id}`);
+    return response?.data as any;
+};
+
+export const deletePost = async (id: string, payload: any) => {
+    const response = await httpClient.post(`posts/delete?id=${id}`, payload);
+    return response?.data as any;
+};
+
+export const reportPost = async (id: string, payload: any) => {
+    const response = await httpClient.post(`reports/posts/?id=${id}`, payload);
+    return response?.data as any;
+};
+
+export const reportComment = async (id: string, payload: any) => {
+    const response = await httpClient.post(
+        `reports/comments/?id=${id}`,
+        payload,
+    );
+    return response?.data as any;
+};

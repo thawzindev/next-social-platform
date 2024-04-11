@@ -3,19 +3,22 @@
 
 import type { Post } from '@/types/Post';
 import {
+    AlertCircleIcon,
     BookmarkCheckIcon,
     BookmarkIcon,
     HeartIcon,
     InboxIcon,
     MessageCircleIcon,
+    MoreHorizontalIcon,
     SaveIcon,
+    TrashIcon,
 } from 'lucide-react';
 import Image from 'next/legacy/image';
 import Link from 'next/link';
-import React from 'react';
+import React, { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { makeBookmark, makeComment, makeReaction, postComments } from '@/services/apiService';
+import { deletePost, makeBookmark, makeComment, makeReaction, postComments, reportComment, reportPost } from '@/services/apiService';
 import toast from 'react-hot-toast';
 import {
     Drawer,
@@ -30,14 +33,21 @@ import {
 import { Button } from '@/components/button';
 import { Input } from '@/components/ui/input';
 import { useFetchPostComments } from '@/hooks/useFetchPostComments';
+import { DropdownMenu, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/dropdown-menu';
+import { DropdownMenuContent } from '@radix-ui/react-dropdown-menu';
+import { useUser } from '@clerk/nextjs';
 
 const Post: React.FC<Post> = (post) => {
 
     const queryClient = useQueryClient();
+    const { isLoaded, isSignedIn, user } = useUser();
 
     const [isLoading, setIsLoading] = React.useState(false);
-
+    const [actionOpen, setActionOpen] = useState(false);
+    const [reportReason, setReportReason] = useState('');
+    const [modalOpen, setModalOpen] = useState(false);
     const [likeCount, setLikeCount] = React.useState(post.likeCount);
+    const [commentCount, setComentCount] = React.useState(post.commentCount);
     const [commentText, setCommentText] = React.useState('');
 
     const [isLiked, setIsLiked] = React.useState(
@@ -53,8 +63,6 @@ const Post: React.FC<Post> = (post) => {
             return makeReaction(payload);
         },
         onSuccess: async (data) => {
-            console.log('SUCCESS');
-            console.log(data);
             setLikeCount(data?.likeCount);
             setIsLiked(data?.action === 'like' ? true : false);
             toast.success(data?.message || 'Success');
@@ -74,8 +82,6 @@ const Post: React.FC<Post> = (post) => {
             return makeBookmark(payload);
         },
         onSuccess: async (data) => {
-            console.log('SUCCESS');
-            console.log(data);
             setIsBookmark(data?.action === 'store' ? true : false);
             toast.success(data?.message || 'Success');
         },
@@ -91,15 +97,19 @@ const Post: React.FC<Post> = (post) => {
         mutationFn: (payload: any) => {
             return makeComment(payload);
         },
-        onSuccess: async (data) => {
-            queryClient.invalidateQueries(['post-comment']);
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({
+                queryKey: ['post-comment'],
+            })
+            setComentCount(commentCount + 1)
             toast.success(data?.message || 'Success');
         },
         onError: (error) => {
             console.log('error comments', error.stack);
-            toast.error(error?.message);
+            toast.error("something went wrong");
         },
         onSettled: () => {
+            setCommentText('')
             setIsLoading(false);
         },
     });
@@ -138,6 +148,90 @@ const Post: React.FC<Post> = (post) => {
         bookmarkMutation.mutate(payload);
     };
 
+    const reportMutation = useMutation({
+        mutationFn: (payload: any) => {
+            return reportPost(post.id, payload);
+        },
+        onSuccess: async (data) => {
+            toast.success('Reported this idea', { duration: 2000 })
+        },
+        onError: (error) => {
+            toast.error(error.message, { duration: 2000 })
+            console.log('error', error.message)
+        },
+        onSettled: () => {
+            setReportReason('')
+            setModalOpen(false)
+            setIsLoading(false)
+        },
+    })
+
+    const commentReportMutation = useMutation({
+        mutationFn: (payload: any) => {
+            return reportComment(post.id, payload);
+        },
+        onSuccess: async (data) => {
+            toast.success('Reported this idea', { duration: 2000 })
+        },
+        onError: (error) => {
+            toast.error(error.message, { duration: 2000 })
+            console.log('error', error.message)
+        },
+        onSettled: () => {
+            setReportReason('')
+            setModalOpen(false)
+            setIsLoading(false)
+        },
+    })
+
+    const postDeleteMutation = useMutation({
+        mutationFn: (payload) => {
+            return deletePost(post.id, payload);
+        },
+        onSuccess: async (data) => {
+            toast.success('Deleted the post', { duration: 2000 })
+            queryClient.invalidateQueries({ queryKey: ['posts'] })
+        },
+        onError: (error) => {
+            toast.error(error.message, { duration: 2000 })
+            console.log('error', error.message)
+        },
+        onSettled: () => {
+            setReportReason('')
+            setModalOpen(false)
+            setIsLoading(false)
+        },
+    })
+
+    const submitReport = () => {
+        setIsLoading(true)
+        const payload = {
+            reason: reportReason,
+            postId: post.id
+        }
+        reportMutation.mutate(payload)
+    }
+
+    const submitCommentReport = (commentId: string, commentReportReason: string) => {
+        setIsLoading(true)
+        const payload = {
+            reason: commentReportReason,
+            commentId: commentId,
+            postId: post.id
+        }
+        commentReportMutation.mutate(payload)
+    }
+
+    const submitDeleteIdea = () => {
+        if (window.confirm('Are you sure you want to delete this post?')) {
+            setIsLoading(true)
+            const payload = {
+                postId: post.id
+            }
+            postDeleteMutation.mutate(payload)
+        }
+    }
+
     return (
         <>
             <div className="main-section rounded-md border bg-white px-4 pt-4">
@@ -161,10 +255,40 @@ const Post: React.FC<Post> = (post) => {
                         </div>
                     </div>
 
-                    <span className="self-center text-sm text-gray-500">
+                    <span className="flex-1 text-right text-sm text-gray-500">
                         {formatDistanceToNow(new Date(post.createdAt), {
                             addSuffix: true,
                         })}
+                    </span>
+
+                    <span className='action'>
+                        <DropdownMenu open={actionOpen} onOpenChange={setActionOpen}>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                    <MoreHorizontalIcon className="text-gray-400" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-[200px]">
+                                <DropdownMenuItem onClick={() => setModalOpen(true)}>
+                                    <AlertCircleIcon className="w-5 h-5 mr-2" />
+                                    Report
+                                </DropdownMenuItem>
+                                {
+                                    post.user?.refId === user?.id && (
+                                        <DropdownMenuGroup>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem className="text-red-600 hover:text-red-800"
+                                                onClick={() => submitDeleteIdea()}
+                                            >
+                                                <TrashIcon className="w-5 h-5 mr-2" />
+                                                Delete
+                                            </DropdownMenuItem>
+                                        </DropdownMenuGroup>
+                                    )
+                                }
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
                     </span>
                 </div>
 
@@ -257,6 +381,18 @@ const Post: React.FC<Post> = (post) => {
                                                                         },
                                                                     )}
                                                                 </div>
+                                                                <div className='text-right flex-1 cursor-pointer'
+                                                                    onClick={() => {
+                                                                        let reportReason = prompt('Report Reason');
+
+                                                                        if (reportReason) {
+                                                                            submitCommentReport(comment.id, reportReason)
+                                                                        }
+
+                                                                    }}
+                                                                >
+                                                                    report
+                                                                </div>
                                                             </div>
                                                             <div>
                                                                 {comment?.content}
@@ -280,7 +416,7 @@ const Post: React.FC<Post> = (post) => {
                                     </DrawerFooter>
                                 </DrawerContent>
                             </Drawer>
-                            2.7K
+                            {commentCount}
                         </button>
 
                         <button
@@ -297,6 +433,37 @@ const Post: React.FC<Post> = (post) => {
                     </div>
                 </div>
             </div>
+
+            {modalOpen && (
+                <div className="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+                        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                <div className="">
+                                    <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                        <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                            Report Reason
+                                        </h3>
+                                        <div className="mt-2">
+                                            <textarea value={reportReason} onChange={(e) => setReportReason(e.target.value)} className="w-full p-2 border border-gray-300 rounded"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                <button type="button" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm" onClick={submitReport} disabled={isLoading}>
+                                    Submit
+                                </button>
+                                <button type="button" className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm" onClick={() => setModalOpen(false)} disabled={isLoading}>
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 };

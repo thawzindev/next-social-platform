@@ -9,12 +9,12 @@ export default async function Page() {
     const { isLoaded, isSignedIn, user } = useUser();
 
     return (
-        <div className="mx-2 h-3/4 rounded-md">
+        <div className="mx-2 h-screen rounded-md">
             <SendbirdApp
                 appId={APP_ID}
                 userId={user?.fullName}
                 nickname={user?.fullName}
-                // accessToken="ff606f9a66cb34456d2ca60e63714f1bef6e7e3b"
+            // accessToken="ff606f9a66cb34456d2ca60e63714f1bef6e7e3b"
             />
         </div>
     );

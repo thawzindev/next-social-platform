@@ -66,12 +66,22 @@ export async function GET(request: NextRequest) {
                         postId: true,
                     },
                 },
+                comments: {
+                    select: {
+                        id: true,
+                        content: true,
+                        postId: true,
+                        createdAt: true,
+                        updatedAt: true,
+                    },
+                },
             },
         });
 
         const postsWithLikeCount = posts.map((post) => ({
             ...post,
             likeCount: post.Like.length,
+            commentCount: post.comments.length,
             userId: authUser.id,
         }));
 

@@ -19,17 +19,15 @@ import { Button } from '@/components/button';
 import { currentUser, SignOutButton, useUser } from '@clerk/nextjs';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useFetchUnReadNotificationCount } from '@/hooks/useFetchUnReadNotificationCount';
+import { Badge } from '@/components/ui/badge';
 
 const Sidebar = () => {
     const { isLoaded, isSignedIn, user } = useUser();
 
+    const { data, error } = useFetchUnReadNotificationCount();
+
     const router = useRouter();
-
-    if (!isLoaded || !isSignedIn) {
-        // return null;
-    }
-
-    // console.log(user.imageUrl);
 
     return (
         <div className="border-1 mt-8 h-fit space-y-4 rounded rounded-md border bg-[#FFFFFF] p-4">
@@ -82,7 +80,7 @@ const Sidebar = () => {
                     }}
                 >
                     <BellIcon className="mr-2 h-4 w-4" />
-                    Notifications
+                    Notifications <Badge className='ml-2'>{data?.unreadCount || 0}</Badge>
                 </button>
 
                 <button
@@ -122,7 +120,7 @@ const Sidebar = () => {
                 <hr />
 
                 <SignOutButton>
-                    <div className="ml-4 flex cursor-pointer px-2 py-3 hover:rounded-lg hover:bg-red-100">
+                    <div className="pl-4 flex cursor-pointer px-2 py-3 hover:rounded-lg hover:bg-red-100">
                         <LogOutIcon className="h-6 w-6" />
                         <span className="ml-3">Logout</span>
                     </div>

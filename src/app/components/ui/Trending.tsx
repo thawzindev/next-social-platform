@@ -93,12 +93,6 @@ const Trending = () => {
                         >
                             Privacy
                         </a>
-                        <a
-                            href="/terms"
-                            className="text-xs text-gray-900 underline hover:text-gray-800"
-                        >
-                            Jobs
-                        </a>
                     </div>
 
                     <div className="mt-5 text-center">

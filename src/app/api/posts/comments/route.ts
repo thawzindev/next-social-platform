@@ -93,6 +93,43 @@ export async function POST(request: NextRequest) {
             },
         });
 
+        // Fetch the user's friends
+        const owner = await prisma.user.findFirst({
+            where: {
+                id: comment.userId,
+            },
+        });
+
+        if (owner) {
+            // Create a notification for friend
+
+            const existingNotification = await prisma.notification.findFirst({
+                where: {
+                    userId: owner.id,
+                    postId: comment.postId,
+                },
+            });
+
+            if (existingNotification) {
+                await prisma.notification.update({
+                    where: {
+                        id: existingNotification.id,
+                    },
+                    data: {
+                        updatedAt: new Date(),
+                    },
+                });
+            } else {
+                await prisma.notification.create({
+                    data: {
+                        userId: owner.id,
+                        content: `${user.name} has commented on your post.`,
+                        postId: comment.postId,
+                    },
+                });
+            }
+        }
+
         return NextResponse.json({
             status: 200,
             message: 'Successfully commented.',

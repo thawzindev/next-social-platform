@@ -29,23 +29,23 @@ export async function POST(request: NextRequest) {
         return new Response('authUser not found', { status: 401 });
     }
 
-    let post = await prisma.like.findFirst({
+    let reaction = await prisma.like.findFirst({
         where: {
             postId: body.postId,
             userId: authUser.id,
         },
     });
 
-    if (post) {
+    if (reaction) {
         await prisma.like.delete({
             where: {
-                id: post.id,
+                id: reaction.id,
             },
         });
 
         action = 'dislike';
     } else {
-        post = await prisma.like.create({
+        reaction = await prisma.like.create({
             data: {
                 // userId: authUser.id,
                 // postId: body.postId,
@@ -63,6 +63,32 @@ export async function POST(request: NextRequest) {
         });
     }
 
+    if (action === 'like') {
+        // Fetch the user's friends
+        const owner = await prisma.user.findFirst({
+            where: {
+                id: reaction.userId,
+            },
+        });
+
+        if (owner) {
+            await prisma.notification.create({
+                data: {
+                    userId: owner.id,
+                    content: `${authUser.name} has reacted your post.`,
+                    postId: data.postId,
+                },
+            });
+        }
+    } else if (action === 'dislike') {
+        await prisma.notification.deleteMany({
+            where: {
+                postId: reaction.postId,
+                userId: reaction.userId,
+            },
+        });
+    }
+
     let totalReactions = await prisma.like.count({
         where: {
             postId: body.postId,
@@ -70,9 +96,9 @@ export async function POST(request: NextRequest) {
     });
 
     let payload = {
-        id: post.id,
-        postId: post.postId,
-        userId: post.userId,
+        id: reaction.id,
+        postId: data.postId,
+        userId: authUser.id,
         action: action,
         likeCount: totalReactions,
     };

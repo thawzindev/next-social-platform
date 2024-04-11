@@ -7,6 +7,7 @@ export interface Post {
     createdAt: string;
     updatedAt: string;
     likeCount: number;
+    commentCount: number;
     Like: [];
     file?: File;
     user: User;
