@@ -2,8 +2,6 @@ import SendbirdApp from '@sendbird/uikit-react/App';
 import { useUser } from '@clerk/nextjs';
 
 const APP_ID = '2253F2DD-7980-4BB3-9D5B-2855D2013F8E';
-const USER_ID = 'Thaw';
-// const NICKNAME = 'Thaw';
 
 export default async function Page() {
     const { isLoaded, isSignedIn, user } = useUser();

@@ -20,7 +20,7 @@ export function Providers({ children, ...props }: providerProps) {
     return (
         <QueryClientProvider client={queryClient}>
             <ReactQueryStreamedHydration>
-                <ReactQueryDevtools initialIsOpen={false} />
+                {/* <ReactQueryDevtools initialIsOpen={false} /> */}
                 <CreatePostModal />
                 <Toaster />
                 <div className="">{children}</div>

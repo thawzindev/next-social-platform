@@ -89,3 +89,105 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ status: 500, message: error?.stack });
     }
 }
+
+export async function GET(request: NextRequest) {
+    try {
+        const { userId } = auth();
+
+        if (!userId) {
+            return new Response('Unauthorized', { status: 401 });
+        }
+
+        let authUser = await prisma.user.findUnique({
+            where: {
+                refId: userId?.toString(),
+            },
+        });
+
+        if (!authUser) {
+            return new Response('authUser not found', { status: 401 });
+        }
+
+        const savedId = await prisma.bookmark.findMany({
+            where: {
+                userId: authUser.id,
+            },
+            select: {
+                postId: true,
+            },
+        });
+
+        const posts = await prisma.post.findMany({
+            where: {
+                id: {
+                    in: savedId.map((bookmark: any) => bookmark.postId),
+                },
+                OR: [
+                    {
+                        deletedAdminId: {
+                            isSet: false,
+                        },
+                    },
+                    {
+                        deletedAdminId: null,
+                    },
+                ],
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+            include: {
+                file: true,
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        refId: true,
+                        profileImage: true,
+                    },
+                },
+                Like: {
+                    select: {
+                        id: true,
+                        userId: true,
+                    },
+                },
+                Bookmark: {
+                    select: {
+                        id: true,
+                        userId: true,
+                        postId: true,
+                    },
+                },
+                comments: {
+                    select: {
+                        id: true,
+                        content: true,
+                        postId: true,
+                        createdAt: true,
+                        updatedAt: true,
+                    },
+                },
+            },
+        });
+
+        const postsWithLikeCount = posts.map((post) => ({
+            ...post,
+            likeCount: post.Like.length,
+            commentCount: post.comments.length,
+            userId: authUser.id,
+        }));
+
+        return NextResponse.json({
+            data: postsWithLikeCount,
+            status: 200,
+            message: 'success',
+        });
+    } catch (error) {
+        return NextResponse.json({
+            err: error.stack,
+            status: 500,
+            message: 'failed',
+        });
+    }
+}

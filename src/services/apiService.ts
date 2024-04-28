@@ -89,6 +89,16 @@ export const reportPost = async (id: string, payload: any) => {
     return response?.data as any;
 };
 
+export const createPost = async (payload: any) => {
+    const response = await httpClient.post(`posts`, payload);
+    return response?.data as any;
+};
+
+export const savedPost = async () => {
+    const response = await httpClient.get(`bookmarks`);
+    return response?.data as any;
+};
+
 export const reportComment = async (id: string, payload: any) => {
     const response = await httpClient.post(
         `reports/comments/?id=${id}`,

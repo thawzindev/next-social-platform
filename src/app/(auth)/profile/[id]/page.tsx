@@ -5,6 +5,7 @@ import FeedSkeleton from '@/app/components/skeletons/FeedSkeleton';
 import { useFetchProfile } from '@/hooks/useFetchProfile';
 import { friendRequest } from '@/services/apiService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { UserRoundPlusIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import React, { Suspense } from 'react';
@@ -95,7 +96,7 @@ const Page = () => {
                     addFriend();
                 }}
             >
-                Add friend
+                <UserRoundPlusIcon className="w-4 h-4 mr-1" /> Add friend
             </button>
         );
     }

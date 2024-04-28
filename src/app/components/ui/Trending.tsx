@@ -19,6 +19,8 @@ const Trending = () => {
                     <div className="mt-2 space-y-2">
                         <Input
                             type="text"
+                            name='search'
+                            autoComplete='on'
                             className="rounded-md focus:outline-none"
                             placeholder="keywords ..."
                             onKeyDown={(event) => {

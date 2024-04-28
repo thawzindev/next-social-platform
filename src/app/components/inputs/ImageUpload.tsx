@@ -12,8 +12,20 @@ const ImageUpload = ({ onFileChange }: any) => {
     const [loading, setLoading] = useState<boolean>(false);
     const [image, setImage] = useState<object | null>({});
 
+    const supportedExtensions = ['jpeg', 'jpg', 'png', 'gif'];
+
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files ? e.target.files[0] : null;
+
+        if (file) {
+            const fileType = file.type.split('/')[0];
+            if (fileType !== 'image') {
+                alert('Please upload an image file');
+                return;
+            }
+        }
+
         setFile(file);
 
         if (file) {

@@ -5,6 +5,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
@@ -42,6 +45,7 @@ enum LoginType {
 
 model Admin {
   id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
   email     String        @unique
   password  String
   status    AccountStatus @default(ACTIVE)

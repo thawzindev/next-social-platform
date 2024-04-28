@@ -4,6 +4,7 @@ import Post from '@/app/components/elements/Post';
 import { Button } from '@/components/button';
 import { useFetchSearchResult } from '@/hooks/useFetchSearchResult';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React from 'react';
 
@@ -50,19 +51,21 @@ const Page = () => {
                                         className="h-12 w-12 rounded-lg"
                                     />
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-medium text-gray-900">
-                                            {person.name}
-                                        </p>
+                                        <Link href={`/profile/${person.id}`}>
+                                            <p className="text-sm font-medium text-gray-900 underline cursor-pointer">
+                                                {person.name}
+                                            </p>
+                                        </Link>
                                     </div>
 
-                                    <div className="min-w-0 flex-1">
+                                    {/* <div className="min-w-0 flex-1">
                                         <Button
                                             className="mx-2"
                                             variant={'default'}
                                         >
                                             Friend Request
                                         </Button>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                         );

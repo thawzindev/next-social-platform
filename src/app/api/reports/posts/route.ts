@@ -50,11 +50,16 @@ export async function POST(request: NextRequest) {
         });
 
         if (existingReport) {
-            return NextResponse.json({
-                status: 200,
-                message: 'Successfully reported the comment.',
-                data: existingReport,
-            });
+            return NextResponse.json(
+                {
+                    status: 200,
+                    message: 'Post has been already reported.',
+                    data: existingReport,
+                },
+                {
+                    status: 400,
+                },
+            );
         }
 
         const report = await prisma.report.create({

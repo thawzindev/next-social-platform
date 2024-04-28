@@ -55,7 +55,10 @@ const Sidebar = () => {
                     Home
                 </button>
 
-                <button className="inline-flex h-10 w-full items-center justify-start whitespace-nowrap rounded-md px-4 py-2 text-left text-sm font-medium text-gray-900 ring-offset-background transition-colors hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                <button className="inline-flex h-10 w-full items-center justify-start whitespace-nowrap rounded-md px-4 py-2 text-left text-sm font-medium text-gray-900 ring-offset-background transition-colors hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                    onClick={() => {
+                        router.push('/saved');
+                    }}>
                     <BookmarkIcon className="mr-2 h-4 w-4" />
                     Saved
                 </button>

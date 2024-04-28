@@ -1,0 +1,229 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table admins {
+  id String [pk]
+  name String [not null]
+  email String [unique, not null]
+  password String [not null]
+  status AccountStatus [not null, default: 'ACTIVE']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table users {
+  id String [pk]
+  refId String [unique, not null]
+  email String [unique, not null]
+  name String [not null]
+  dateOfBirth DateTime
+  status AccountStatus [not null, default: 'ACTIVE']
+  posts posts [not null]
+  comments comments [not null]
+  Like likes [not null]
+  Stories stories [not null]
+  sentRequests friendrequests [not null]
+  gotRequests friendrequests [not null]
+  isProfileLocked Boolean [not null, default: false]
+  profileImage String
+  loginType String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  LoginHistory loginhistories [not null]
+  Notification notifications [not null]
+  Report reports [not null]
+  Bookmark bookmarks [not null]
+}
+
+Table posts {
+  id String [pk]
+  content String [not null]
+  user users [not null]
+  userId String [not null]
+  comments comments [not null]
+  privacy Privacy [not null, default: 'PUBLIC']
+  file files
+  fileId String
+  status PostStatus [not null, default: 'ACTIVE']
+  deletedAdminId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  Like likes [not null]
+  Notification notifications [not null]
+  Report reports [not null]
+  Bookmark bookmarks [not null]
+}
+
+Table files {
+  id String [pk]
+  path String [not null]
+  format String [not null]
+  resourceType String [not null]
+  metadata Json [not null]
+  fullUrl String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  Story stories
+  Post posts [not null]
+}
+
+Table comments {
+  id String [pk]
+  content String [not null]
+  user users [not null]
+  userId String [not null]
+  post posts [not null]
+  postId String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  Report reports [not null]
+  Like likes [not null]
+}
+
+Table likes {
+  id String [pk]
+  user users [not null]
+  userId String [not null]
+  post posts
+  postId String [not null]
+  comment comments
+  commentId String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table friendrequests {
+  id String [pk]
+  from users [not null]
+  fromUserId String [not null]
+  to users [not null]
+  toUserId String [not null]
+  status String [not null, default: 'FRIEND_PENDING']
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table stories {
+  id String [pk]
+  userId String [not null]
+  user users [not null]
+  fileId String [unique, not null]
+  file files [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table loginhistories {
+  id String [pk]
+  userId String [not null]
+  user users [not null]
+  token String [not null]
+  userAgent String [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table notifications {
+  id String [pk]
+  userId String [not null]
+  user users [not null]
+  content String [not null]
+  postId String [not null]
+  post posts
+  isRead Boolean [not null, default: false]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table bookmarks {
+  id String [pk]
+  userId String [not null]
+  user users [not null]
+  postId String [not null]
+  post posts
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Table reports {
+  id String [pk]
+  reportUserId String [not null]
+  user users [not null]
+  postId String
+  post posts
+  commentId String
+  comment comments
+  status ReportStatus [not null, default: 'PENDING']
+  remarks String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+}
+
+Enum PostStatus {
+  ACTIVE
+  DELETED
+  DELETED_BY_ADMIN
+}
+
+Enum ReportStatus {
+  PENDING
+  REJECTED
+  ACTION_TAKEN
+}
+
+Enum AccountStatus {
+  ACTIVE
+  BANNED
+}
+
+Enum Privacy {
+  PUBLIC
+  FRIENDS
+  ONLYME
+}
+
+Enum LoginType {
+  EMAIL
+  FACEBOOK
+  GITHUB
+  GOOGLE
+}
+
+Ref: posts.userId > users.id
+
+Ref: posts.fileId > files.id
+
+Ref: comments.userId > users.id
+
+Ref: comments.postId > posts.id
+
+Ref: likes.userId > users.id
+
+Ref: likes.postId > posts.id
+
+Ref: likes.commentId > comments.id
+
+Ref: friendrequests.fromUserId > users.id
+
+Ref: friendrequests.toUserId > users.id
+
+Ref: stories.userId > users.id
+
+Ref: stories.fileId - files.id
+
+Ref: loginhistories.userId > users.id
+
+Ref: notifications.userId > users.id
+
+Ref: notifications.postId > posts.id
+
+Ref: bookmarks.userId > users.id
+
+Ref: bookmarks.postId > posts.id
+
+Ref: reports.reportUserId > users.id
+
+Ref: reports.postId > posts.id
+
+Ref: reports.commentId > comments.id

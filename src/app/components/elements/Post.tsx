@@ -3,6 +3,7 @@
 
 import type { Post } from '@/types/Post';
 import {
+    AlertCircle,
     AlertCircleIcon,
     BookmarkCheckIcon,
     BookmarkIcon,
@@ -42,6 +43,7 @@ const Post: React.FC<Post> = (post) => {
     const queryClient = useQueryClient();
     const { isLoaded, isSignedIn, user } = useUser();
 
+    const [isCommentEmpty, setIsCommentEmpty] = React.useState(false);
     const [isLoading, setIsLoading] = React.useState(false);
     const [actionOpen, setActionOpen] = useState(false);
     const [reportReason, setReportReason] = useState('');
@@ -138,6 +140,14 @@ const Post: React.FC<Post> = (post) => {
             postId: post.id,
             content: commentText,
         };
+
+        if (!commentText) {
+            setIsCommentEmpty(true);
+            return;
+        } else {
+            setIsCommentEmpty(false);
+        }
+
         commentMutation.mutate(payload);
     };
 
@@ -153,7 +163,7 @@ const Post: React.FC<Post> = (post) => {
             return reportPost(post.id, payload);
         },
         onSuccess: async (data) => {
-            toast.success('Reported this idea', { duration: 2000 })
+            toast.success('Reported the post.', { duration: 2000 })
         },
         onError: (error) => {
             toast.error(error.message, { duration: 2000 })
@@ -171,7 +181,7 @@ const Post: React.FC<Post> = (post) => {
             return reportComment(post.id, payload);
         },
         onSuccess: async (data) => {
-            toast.success('Reported this idea', { duration: 2000 })
+            toast.success('Reported the comment', { duration: 2000 })
         },
         onError: (error) => {
             toast.error(error.message, { duration: 2000 })
@@ -301,13 +311,13 @@ const Post: React.FC<Post> = (post) => {
                                 alt={post.content}
                                 loading="lazy"
                                 width={
-                                    post.file.width
-                                        ? parseInt(post.file.width)
+                                    post.file?.metadata?.width
+                                        ? parseInt(post.file?.metadata?.width)
                                         : 500
                                 }
                                 height={
-                                    post.file.height
-                                        ? parseInt(post.file.height)
+                                    post.file?.metadata?.height
+                                        ? parseInt(post.file?.metadata?.height)
                                         : 500
                                 }
                                 className="h-96 w-96 cursor-pointer rounded-md"
@@ -404,6 +414,13 @@ const Post: React.FC<Post> = (post) => {
 
                                                 <div className="grid gap-1.5 text-sm">
                                                     <Input placeholder="Add your comment ..." onChange={(e) => setCommentText(e.target.value)} />
+                                                    {
+                                                        isCommentEmpty && (
+                                                            <small className="text-red-500 flex">
+                                                                <AlertCircle className="w-4 h-4 mr-1" />Comment is required
+                                                            </small>
+                                                        )
+                                                    }
                                                 </div>
                                             </div>
                                         </DrawerDescription>
